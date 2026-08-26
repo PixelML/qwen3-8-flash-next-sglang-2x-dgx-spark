@@ -39,15 +39,20 @@ rejects BF16 state, or decode fails because state is not BF16.
 
 ## API is healthy but single-request TPS is low
 
-This deployment's non-speculative baseline is approximately 25–26 output
-tok/s for one stream, while aggregate throughput reaches roughly 200–250 tok/s
-under continuous batching. A public TLS proxy can reduce the observed
-single-request figure further.
+The non-speculative baseline is approximately 25–26 output tok/s for one
+stream. The verified NEXTN/MTP profile reaches 47.54 tok/s on the repeatable
+single-stream test and 53.86 tok/s on a separate coding response.
 
-The official SGLang low-latency profile enables NEXTN/MTP with three steps and
-four draft tokens. Treat it as a separate tuning profile on SM121: benchmark
-acceptance rate, memory headroom, output quality, and rank stability before
-using it for production.
+Confirm all four speculative flags from `scripts/start-node.sh` are present in
+the container command. Startup logs should show draft-weight loading and MTP
+CUDA-graph capture. Runtime logs should report accepted draft lengths and
+rates; this test observed acceptance rates around 0.6–0.8. A public TLS proxy
+can still reduce client-observed throughput.
+
+With MTP, the configured request limit of 36 becomes an effective limit of 25
+because each request needs additional Mamba state. This is expected; lowering
+context length or changing memory allocation may change the limit but requires
+a new quality, memory, and stability test.
 
 ## TLS hostname fails only through a proxy
 

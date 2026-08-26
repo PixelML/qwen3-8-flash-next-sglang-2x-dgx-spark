@@ -96,6 +96,10 @@ docker run --detach \
     --mamba-ssm-dtype bfloat16 \
     --mamba-scheduler-strategy extra_buffer \
     --mamba-track-interval 64 \
+    --speculative-algorithm NEXTN \
+    --speculative-num-steps 3 \
+    --speculative-eagle-topk 1 \
+    --speculative-num-draft-tokens 4 \
     --chunked-prefill-size 4096 \
     --max-running-requests "${MAX_RUNNING_REQUESTS}" \
     --context-length "${CONTEXT_LENGTH}" \

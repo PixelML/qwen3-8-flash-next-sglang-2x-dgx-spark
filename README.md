@@ -20,7 +20,7 @@ needed by the pinned day-zero SGLang image.
 | Parallelism | TP=2, two nodes, one GB10 GPU per node |
 | Context | 262,144 tokens |
 | Quantization | ModelOpt NVFP4, FlashInfer CUTLASS GEMM/MoE |
-| Speculative decoding | Disabled in the verified baseline |
+| Speculative decoding | NEXTN/MTP: 3 steps, top-k 1, 4 draft tokens |
 
 The deployment follows the
 [official SGLang cookbook](https://docs.sglang.io/cookbook/autoregressive/Qwen/Qwen3.8-Flash-Next)
@@ -28,19 +28,22 @@ and adapts it to the memory and SM121 kernel constraints of DGX Spark.
 
 ## Measured performance
 
-Direct SGLang measurements with 192-token coding requests:
+Direct SGLang measurements with NEXTN/MTP and 192-token coding requests:
 
 | Concurrent requests | Aggregate output tok/s |
 | ---: | ---: |
-| 1 | 26.09 |
-| 4 | 89.93 |
-| 8 | 153.54 |
-| 16 | 251.83 |
+| 1 | 47.54 |
+| 4 | 87.55 |
+| 8 | 158.17 |
+| 16 | 275.37 |
 
-Single-stream decode is communication and memory-bandwidth bound. Continuous
-batching is where the two-node server delivers its useful throughput. See
+NEXTN/MTP improved the repeatable single-stream result by 82% over the
+non-speculative 26.09 tok/s baseline. A separate coding response reached 53.86
+tok/s. The scheduler accepts 25 simultaneous requests with this profile even
+though `MAX_RUNNING_REQUESTS=36`, because MTP allocates additional Mamba state.
+See
 [`results/RESULTS-2026-08-26.md`](results/RESULTS-2026-08-26.md) for methodology
-and a second live-load run.
+and the before/after results.
 
 ## Requirements
 
@@ -104,14 +107,14 @@ Gated DeltaNet uses Triton for prefill and FlashInfer for decode with BF16
 Mamba state. This split avoids the incompatible state-dtype requirements seen
 when using FlashInfer for both phases on SM121.
 
-## Why 6B active does not imply 50+ tok/s
+## Why NEXTN/MTP matters
 
 Active parameters approximate arithmetic per token. They do not include all
 latency from QSA/Gated DeltaNet kernels, expert routing, memory movement, and
-cross-node synchronization. This verified profile also leaves speculative
-decoding off. The official low-latency profile enables NEXTN/MTP with three
-steps and four draft tokens; it may improve single-stream speed after a
-separate SM121 compatibility and acceptance-rate test.
+cross-node synchronization. The official low-latency NEXTN/MTP profile drafts
+multiple tokens and verifies them together, amortizing that latency when the
+drafts are accepted. On this deployment, observed acceptance rates were about
+0.6–0.8 and single-stream throughput increased from 26.09 to 47.54 tok/s.
 
 ## Repository layout
 
