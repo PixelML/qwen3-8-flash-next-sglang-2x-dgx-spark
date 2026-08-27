@@ -14,8 +14,8 @@ source "${ENV_FILE}"
 set +a
 
 IMAGE_REF="lmsysorg/sglang@sha256:12d3392bdc8be8d35e9a95f191df6aef99c5114bdbefd41bfdc7e760e6d25ec1"
-MODEL_REPO="RadixArk/Qwen3.8-Flash-Next-NVFP4"
-MODEL_REVISION="7b719225242aacd3dbd3f9407468c2ee9a9d2594"
+MODEL_REPO="PixelML/Qwen3.8-Flash-Next-NVFP4-Dual-DGX-Spark"
+MODEL_REVISION="b80180e371f13348ec49641a6e66999e7854b179"
 CONTAINER_NAME="qwen38-flash-next-sglang"
 SECRET_FILE="${REPO_ROOT}/.sglang-api-key"
 

@@ -16,9 +16,9 @@ NVFP4 conversion; PixelML did not modify or rebrand the quantized tensors.
 
 | Component | Pin |
 | --- | --- |
-| Model | `RadixArk/Qwen3.8-Flash-Next-NVFP4` |
-| PixelML weight mirror | [`PixelML/Qwen3.8-Flash-Next-NVFP4-Dual-DGX-Spark`](https://huggingface.co/PixelML/Qwen3.8-Flash-Next-NVFP4-Dual-DGX-Spark) |
-| Model revision | `7b719225242aacd3dbd3f9407468c2ee9a9d2594` |
+| Model | [`PixelML/Qwen3.8-Flash-Next-NVFP4-Dual-DGX-Spark`](https://huggingface.co/PixelML/Qwen3.8-Flash-Next-NVFP4-Dual-DGX-Spark) |
+| Model revision | `b80180e371f13348ec49641a6e66999e7854b179` |
+| Original checkpoint | `RadixArk/Qwen3.8-Flash-Next-NVFP4@7b719225242aacd3dbd3f9407468c2ee9a9d2594` |
 | Source model | `Qwen/Qwen3.8-Flash-Next` |
 | Source revision | `f5d08274bafd880402bd16f5e3e6c514136ec06c` |
 | SGLang image | `lmsysorg/sglang@sha256:12d3392bdc8be8d35e9a95f191df6aef99c5114bdbefd41bfdc7e760e6d25ec1` |
