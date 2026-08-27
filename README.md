@@ -7,11 +7,17 @@ This recipe uses an NVFP4 checkpoint, tensor parallelism across both GB10 GPUs,
 and direct RoCE networking. It also documents two SM121 compatibility changes
 needed by the pinned day-zero SGLang image.
 
+The exact validated weights are available from the attributed PixelML mirror:
+**[`PixelML/Qwen3.8-Flash-Next-NVFP4-Dual-DGX-Spark`](https://huggingface.co/PixelML/Qwen3.8-Flash-Next-NVFP4-Dual-DGX-Spark)**.
+The model card preserves the original Qwen license and credits RadixArk for the
+NVFP4 conversion; PixelML did not modify or rebrand the quantized tensors.
+
 ## Verified configuration
 
 | Component | Pin |
 | --- | --- |
 | Model | `RadixArk/Qwen3.8-Flash-Next-NVFP4` |
+| PixelML weight mirror | [`PixelML/Qwen3.8-Flash-Next-NVFP4-Dual-DGX-Spark`](https://huggingface.co/PixelML/Qwen3.8-Flash-Next-NVFP4-Dual-DGX-Spark) |
 | Model revision | `7b719225242aacd3dbd3f9407468c2ee9a9d2594` |
 | Source model | `Qwen/Qwen3.8-Flash-Next` |
 | Source revision | `f5d08274bafd880402bd16f5e3e6c514136ec06c` |
@@ -123,6 +129,13 @@ drafts are accepted. On this deployment, observed acceptance rates were about
 - `results/` — measured throughput and validation evidence.
 - `docs/TROUBLESHOOTING.md` — known failure signatures and fixes.
 
-## License
+## License and model provenance
 
-MIT. The referenced models and container image retain their own licenses.
+The deployment code in this repository is MIT. The weights are governed by
+the
+[`Qwen Community License 1.0`](https://huggingface.co/PixelML/Qwen3.8-Flash-Next-NVFP4-Dual-DGX-Spark/blob/main/LICENSE),
+including separate commercial-license conditions for Model-as-a-Service and
+AI Work Assistant businesses. The NVFP4 conversion is credited to
+[`RadixArk`](https://huggingface.co/RadixArk/Qwen3.8-Flash-Next-NVFP4); the
+PixelML Hugging Face repository is an exact community mirror paired with this
+dual-DGX-Spark recipe.
