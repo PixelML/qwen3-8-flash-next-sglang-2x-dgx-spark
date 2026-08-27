@@ -51,6 +51,27 @@ See
 [`results/RESULTS-2026-08-26.md`](results/RESULTS-2026-08-26.md) for methodology
 and the before/after results.
 
+### Uncached prefill
+
+Client-observed prompt throughput with one forced output token, a unique prompt
+prefix per request, and three fully warm samples per size:
+
+| Target prompt | Median actual prompt | Median TTFT | Median input tok/s |
+| ---: | ---: | ---: | ---: |
+| 1K | 1,046 | 0.4524 s | 2,327.78 |
+| 4K | 4,103 | 1.4924 s | 2,758.65 |
+| 16K | 16,471 | 5.5729 s | **2,960.12** |
+
+The input rate includes HTTP, tokenization, scheduling, and the first generated
+token, making it a conservative end-to-end prefill number. Server logs reported
+zero cached prompt tokens for all 50 prefill batches in the final run window.
+See [`results/PREFILL-2026-08-27.md`](results/PREFILL-2026-08-27.md) for raw
+samples and run:
+
+```bash
+python3 scripts/prefill-benchmark.py
+```
+
 ## Requirements
 
 - Two DGX Spark systems on the same NVIDIA system-software release.
@@ -125,6 +146,7 @@ drafts are accepted. On this deployment, observed acceptance rates were about
 ## Repository layout
 
 - `scripts/` — model preparation, secure launch, lifecycle, and tests.
+- `scripts/prefill-benchmark.py` — calibrated unique-prefix TTFT/prefill test.
 - `patches/` — minimal SGLang SM121 compatibility patch.
 - `results/` — measured throughput and validation evidence.
 - `docs/TROUBLESHOOTING.md` — known failure signatures and fixes.
