@@ -76,6 +76,10 @@ docker run --detach \
   --mount type=bind,src="${SCRIPT_DIR}/launch_secure.py",dst=/opt/qwen/launch_secure.py,readonly \
   --mount type=bind,src="${SCRIPT_DIR}/redact_stream.py",dst=/opt/qwen/redact_stream.py,readonly \
   --mount type=bind,src="${REPO_ROOT}/build/qwen_sparse_attn_backend.py",dst=/sgl-workspace/sglang/python/sglang/srt/layers/attention/qwen_sparse_attn_backend.py,readonly \
+  --mount type=bind,src="${REPO_ROOT}/build/sm121_varlen.py",dst=/sgl-workspace/sglang/python/sglang/srt/layers/attention/qsa/sm121_varlen.py,readonly \
+  --mount type=bind,src="${REPO_ROOT}/build/schedule_batch.py",dst=/sgl-workspace/sglang/python/sglang/srt/managers/schedule_batch.py,readonly \
+  --mount type=bind,src="${REPO_ROOT}/build/batch_result_processor.py",dst=/sgl-workspace/sglang/python/sglang/srt/managers/scheduler_components/batch_result_processor.py,readonly \
+  --mount type=bind,src="${REPO_ROOT}/build/scheduler.py",dst=/sgl-workspace/sglang/python/sglang/srt/managers/scheduler.py,readonly \
   --mount type=bind,src="${REPO_ROOT}/cache/huggingface",dst=/root/.cache/huggingface \
   --mount type=bind,src="${REPO_ROOT}/cache/torch",dst=/cache/torch \
   --mount type=bind,src="${REPO_ROOT}/cache/triton",dst=/cache/triton \

@@ -123,12 +123,40 @@ the public internet; place an authenticated TLS proxy in front of it.
 
 ## Why the SM121 patch exists
 
-The pinned SGLang image routes Qwen Sparse Attention decode to FlashInfer only
-on SM100. On GB10/SM121 it falls back to a FlashAttention-4 CuTe kernel that
-fails during compilation. FlashInfer supports the same decode API through XQA
-on SM120/SM121, so [`patches/sglang-qsa-sm121-xqa.patch`](patches/sglang-qsa-sm121-xqa.patch)
-widens that capability check. The startup script extracts the original source,
-applies the two-line patch, and bind-mounts the result read-only.
+Upstream MiaAI-Lab traced long-context corruption on GB10/SM121 to
+FlashInfer's TRT-LLM sparse-decode kernel: on SM121 it silently emits token
+id 0 (`!`) at long context, filling a request's output budget with `!`
+(sglang#36806, sglang#36537). The fix replaces that kernel with a Triton
+packed-varlen fallback for the exact QSA call contract (sglang#36845), and
+this repo ports both changes as unified patches that
+`scripts/apply-sm121-qsa-patch.sh` applies to the sources extracted from the
+stock pinned image and stages into `build/`. `scripts/start-node.sh`
+bind-mounts four patched files read-only over the image's copies:
+
+- `sglang/srt/layers/attention/qwen_sparse_attn_backend.py`
+  ([`patches/sglang-qsa-sm121-fallback.patch`](patches/sglang-qsa-sm121-fallback.patch))
+  — forbids TRT-LLM sparse decode on SM121 and resolves the Triton fallback
+  from `_resolve_flash_attn_varlen_func`, leaving SM100/SM120 paths intact.
+- `sglang/srt/managers/schedule_batch.py`
+  ([`patches/sglang-token0-guard-schedule_batch.patch`](patches/sglang-token0-guard-schedule_batch.patch))
+  — aborts a request once its last 16 output samples are all token id 0.
+- `sglang/srt/managers/scheduler_components/batch_result_processor.py`
+  ([`patches/sglang-token0-guard-batch-result-processor.patch`](patches/sglang-token0-guard-batch-result-processor.patch))
+  — keeps an aborted token-0 completion out of the radix tree.
+- `sglang/srt/managers/scheduler.py`
+  ([`patches/sglang-token0-guard-scheduler.patch`](patches/sglang-token0-guard-scheduler.patch))
+  — resets the prefix cache before the next prefill after an abort.
+
+The fallback kernel itself is staged as a new module,
+`sglang/srt/layers/attention/qsa/sm121_varlen.py`
+([`patches/sm121_varlen.py`](patches/sm121_varlen.py)), also bind-mounted
+read-only.
+
+If a request still decodes 16 consecutive token-id-0 samples, the guard
+finishes it with HTTP 500 and `finish_reason=abort`; the completion is not
+inserted into the radix tree, and the prefix cache is reset before the next
+prefill so a later request cannot reuse the poisoned KV. This port comes
+from MiaAI-Lab's DSpark work, commit `0f95001`.
 
 Gated DeltaNet uses Triton for prefill and FlashInfer for decode with BF16
 Mamba state. This split avoids the incompatible state-dtype requirements seen
