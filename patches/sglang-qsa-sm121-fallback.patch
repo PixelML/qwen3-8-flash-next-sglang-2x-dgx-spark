@@ -1,0 +1,31 @@
+--- qwen_sparse_attn_backend.py.orig
++++ qwen_sparse_attn_backend.py
+@@ -53,6 +53,13 @@
+     at decode row counts; the trtllm-gen decode kernel over a page-aligned
+     scratch measures ~35% faster for the gather+attention pair.
+     """
++    from sglang.srt.utils import is_sm121
++
++    # dspark: SM121 must not use TRT-LLM sparse decode
++    # (sglang#36806 / #36845). That path silently emits token id 0
++    # at long context on GB10.
++    if is_sm121():
++        return None
+     from sglang.srt.utils import is_sm100_supported
+ 
+     if not is_sm100_supported():
+@@ -71,6 +78,14 @@
+     Classic flash_attn (FA2, Ampere/Hopper) is preferred when installed;
+     flash-attn-4's cute interface serves the same call shape on Blackwell.
+     """
++    from sglang.srt.utils import is_sm121
++
++    if is_sm121():
++        from sglang.srt.layers.attention.qsa.sm121_varlen import (
++            qsa_sm121_varlen_attention,
++        )
++
++        return qsa_sm121_varlen_attention
+     try:
+         from flash_attn import flash_attn_varlen_func
+ 

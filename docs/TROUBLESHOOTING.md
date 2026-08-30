@@ -11,7 +11,7 @@ on SM100. GB10 reports SM121, so SGLang falls back to a FlashAttention-4 CuTe
 path that does not compile for this shape.
 
 **Fix:** run `scripts/apply-sm121-qsa-patch.sh`. It extracts the exact original
-file from the pinned image and applies `patches/sglang-qsa-sm121-xqa.patch`.
+file from the pinned image and applies `patches/sglang-qsa-sm121-fallback.patch`.
 The patched source uses FlashInfer XQA on SM120/SM121.
 
 ## Linear-attention state dtype failure

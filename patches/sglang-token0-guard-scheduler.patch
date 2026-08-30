@@ -1,0 +1,19 @@
+--- scheduler.py.orig
++++ scheduler.py
+@@ -3018,6 +3018,16 @@
+         self, running_batch: ScheduleBatch, last_batch: Optional[ScheduleBatch]
+     ) -> NextBatchPlan:
+         self.process_pending_chunked_abort()
++        # dspark_token0_guard: drop the radix tree before the next prefill so
++        # a later request cannot reuse prefix KV corrupted by a token-id-0 run.
++        if running_batch.is_empty():
++            from sglang.srt.managers.schedule_batch import dspark_consume_token0_flush
++
++            if dspark_consume_token0_flush():
++                logger.warning(
++                    "dspark: token-id-0 loop; resetting prefix cache before the next prefill"
++                )
++                self.tree_cache.reset()
+ 
+         if self.enable_fpm:
+             self._fpm_batch_t0 = time.monotonic()

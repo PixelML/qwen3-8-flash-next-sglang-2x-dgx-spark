@@ -1,0 +1,11 @@
+--- batch_result_processor.py.orig
++++ batch_result_processor.py
+@@ -1094,6 +1094,8 @@
+                     if mamba_extra_buffer_lazy_enabled()
+                     else True
+                 )
++                if getattr(req, "token0_loop", False):  # dspark_token0_guard
++                    is_insert = False
+                 release_kv_cache(req, self.tree_cache, is_insert=is_insert)
+ 
+             req.time_stats.set_completion_time()
