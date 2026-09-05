@@ -1,0 +1,64 @@
+{
+  "arm_label": "lane-radixark-nvfp4",
+  "target_tokens": 4000,
+  "word_count": 2463,
+  "out_tokens": 512,
+  "levels": [
+    {
+      "concurrency": 1,
+      "ok_streams": 1,
+      "wall_s": 12.1624,
+      "aggregate_output_tok_per_s": 42.097,
+      "median_per_stream_tok_per_s": 46.949,
+      "median_ttft_s": 1.2767,
+      "spec": {
+        "gen_tokens_delta": 512.0,
+        "verify_calls_delta": 185.0,
+        "accepted_tokens_per_pass": 2.7676
+      },
+      "errors": []
+    },
+    {
+      "concurrency": 4,
+      "ok_streams": 0,
+      "wall_s": 66.3587,
+      "aggregate_output_tok_per_s": 0.0,
+      "median_per_stream_tok_per_s": null,
+      "median_ttft_s": null,
+      "spec": {
+        "gen_tokens_delta": -1237.0,
+        "verify_calls_delta": -331.0,
+        "accepted_tokens_per_pass": null
+      },
+      "errors": [
+        "RemoteDisconnected: Remote end closed connection without response",
+        "RemoteDisconnected: Remote end closed connection without response",
+        "RemoteDisconnected: Remote end closed connection without response",
+        "RemoteDisconnected: Remote end closed connection without response"
+      ]
+    },
+    {
+      "concurrency": 8,
+      "ok_streams": 0,
+      "wall_s": 0.0082,
+      "aggregate_output_tok_per_s": 0.0,
+      "median_per_stream_tok_per_s": null,
+      "median_ttft_s": null,
+      "spec": {
+        "gen_tokens_delta": 0.0,
+        "verify_calls_delta": 0.0,
+        "accepted_tokens_per_pass": null
+      },
+      "errors": [
+        "URLError: <urlopen error [Errno 111] Connection refused>",
+        "URLError: <urlopen error [Errno 111] Connection refused>",
+        "URLError: <urlopen error [Errno 111] Connection refused>",
+        "URLError: <urlopen error [Errno 111] Connection refused>",
+        "URLError: <urlopen error [Errno 111] Connection refused>",
+        "URLError: <urlopen error [Errno 111] Connection refused>",
+        "URLError: <urlopen error [Errno 111] Connection refused>",
+        "URLError: <urlopen error [Errno 111] Connection refused>"
+      ]
+    }
+  ]
+}

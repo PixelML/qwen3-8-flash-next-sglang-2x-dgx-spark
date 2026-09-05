@@ -1,0 +1,46 @@
+{
+  "source": "out-lane-radixark-nvfp4-tf.jsonl",
+  "failed_items": 0,
+  "buckets": {
+    "ALL": {
+      "items": 200,
+      "scored_positions": 39009,
+      "mean_forced_token_logprob": -0.98777,
+      "median_forced_token_logprob": -0.02307,
+      "mean_top1_logprob": -0.39323,
+      "mean_top20_entropy_nats": 0.62681
+    },
+    "code": {
+      "items": 50,
+      "scored_positions": 7864,
+      "mean_forced_token_logprob": -0.21601,
+      "median_forced_token_logprob": -0.00045,
+      "mean_top1_logprob": -0.06838,
+      "mean_top20_entropy_nats": 0.13313
+    },
+    "json": {
+      "items": 50,
+      "scored_positions": 10766,
+      "mean_forced_token_logprob": -1.40777,
+      "median_forced_token_logprob": -0.39984,
+      "mean_top1_logprob": -0.82124,
+      "mean_top20_entropy_nats": 1.09587
+    },
+    "math": {
+      "items": 50,
+      "scored_positions": 8743,
+      "mean_forced_token_logprob": -0.61687,
+      "median_forced_token_logprob": -0.00993,
+      "mean_top1_logprob": -0.18121,
+      "mean_top20_entropy_nats": 0.37387
+    },
+    "prose": {
+      "items": 50,
+      "scored_positions": 11636,
+      "mean_forced_token_logprob": -1.40639,
+      "median_forced_token_logprob": -0.13403,
+      "mean_top1_logprob": -0.37579,
+      "mean_top20_entropy_nats": 0.71805
+    }
+  }
+}

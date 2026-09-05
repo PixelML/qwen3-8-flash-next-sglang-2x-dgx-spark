@@ -72,6 +72,33 @@ samples and run:
 python3 scripts/prefill-benchmark.py
 ```
 
+### Checkpoint scoreboard
+
+| Checkpoint | Quant scheme | Serves on this recipe | Verdict |
+| --- | --- | --- | --- |
+| [`PixelML/…-Dual-DGX-Spark`](https://huggingface.co/PixelML/Qwen3.8-Flash-Next-NVFP4-Dual-DGX-Spark) (RadixArk) | uniform `NVFP4`, `modelopt_fp4` | **yes**, boot 574 s | **in use** |
+| [`nvidia/Qwen3.8-Flash-Next-NVFP4`](https://huggingface.co/nvidia/Qwen3.8-Flash-Next-NVFP4) | `MIXED_PRECISION`, `modelopt_mixed` | **no** — host OOM during weight load at `MEM_FRACTION_STATIC` 0.80 and 0.70 | not a drop-in here |
+
+NVIDIA's official NVFP4 build was benchmarked head-to-head on 2026-09-05 and
+could not be served by this recipe on GB10; its model card lists vLLM and
+B200/B300, so this is outside what NVIDIA supports for it. Full evidence,
+including the lane checkpoint's complete 327 -> 258k prompt-length sweep, is in
+[`results/2026-09-05-nvidia-nvfp4-vs-lane/`](results/2026-09-05-nvidia-nvfp4-vs-lane/README.md).
+
+### Known limits at full context
+
+At ~258k prompt tokens **with thinking enabled**, speculative acceptance
+collapses to 1.00 (nothing accepted), generation falls to 7.6 tok/s against 43.7
+tok/s at the same length with thinking off, warm TTFT exceeds cold TTFT, and the
+SM121 token-0 guard fires. After the guard fires the engine can wedge: HTTP keeps
+answering while the scheduler stops. Everything below 258k is flat at 40-62
+tok/s. See the result above for the full table.
+
+Long unattended runs should also set `STRICT_MEM_CHECK_DURING_IDLE=0` (see
+`scripts/start-node.sh`); the pinned image otherwise turns a few-thousand-token
+KV/mamba accounting drift into a fatal `pool memory leak detected` roughly every
+10-15 minutes of sustained mixed-length load.
+
 ## Requirements
 
 - Two DGX Spark systems on the same NVIDIA system-software release.
