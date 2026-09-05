@@ -1,0 +1,74 @@
+{
+  "hardware": "2x DGX Spark (GB10, sm121, aarch64, ~120 GiB unified memory each), TP=2 over a direct RoCE link",
+  "image": "vllm/vllm-openai:nightly-e962733e08d10f7ca65dac4df99e116460b8b174",
+  "checkpoint": {
+    "name": "nvidia/Qwen3.8-Flash-Next-NVFP4",
+    "on_disk_mib": 126586,
+    "architecture": "Qwen4ExpForConditionalGeneration",
+    "quant_algo": "MIXED_PRECISION",
+    "vllm_autodetected_quantization": "modelopt_mixed",
+    "note": "vLLM read hf_quant_config.json itself; --quantization modelopt was passed and resolved to modelopt_mixed"
+  },
+  "common_flags": [
+    "--tensor-parallel-size 2",
+    "--nnodes 2",
+    "--node-rank {0,1}",
+    "--master-addr ${MASTER_ADDR}",
+    "--master-port ${MASTER_PORT}",
+    "--trust-remote-code",
+    "--quantization modelopt",
+    "--max-model-len 131072",
+    "--max-num-seqs 8",
+    "--gpu-memory-utilization 0.85",
+    "--limit-mm-per-prompt {\"image\":0,\"video\":0}"
+  ],
+  "attempts": [
+    {
+      "id": "A1",
+      "extra": "--speculative-config {\"method\":\"mtp\",\"num_speculative_tokens\":3}",
+      "reached": "weight load complete, then MTP draft-weight load",
+      "weight_load": "11/11 safetensors shards in 6m43s (37.6 s/shard) on a cold page cache",
+      "decisive_lines": [
+        "Initializing a V1 LLM engine (v0.28.1rc1.dev437+ge962733e0) ... quantization=modelopt_mixed, speculative_config=SpeculativeConfig(method='mtp', model='/model', num_spec_tokens=3)",
+        "All limits of multimodal modalities supported by the model are set to 0, running in text-only mode.",
+        "world_size=2 rank=0 local_rank=0 distributed_init_method=tcp://${MASTER_ADDR}:${MASTER_PORT} backend=nccl",
+        "AttributeError: Layer mtp.layers.48.mlp.experts has no parameter 'w2_weight_scale_inv' for checkpoint weight 'mtp.layers.48.mlp.experts.0.down_proj.weight_scale_inv'",
+        "Exception: WorkerProc initialization failed due to an exception in a background process.",
+        "RuntimeError: Engine core initialization failed."
+      ],
+      "verdict": "main model loads; MTP heads do not. The MTP experts are FP8 block-scaled (model-fp8-mtp-ple.safetensors) and this build's modelopt-mixed loader has no w2_weight_scale_inv mapping for them. MTP speculative decoding is unavailable for this checkpoint on this engine."
+    },
+    {
+      "id": "A2-first-launch",
+      "extra": "no speculative config; follower launched without --headless",
+      "reached": "weight load complete on both nodes, then follower aborted",
+      "decisive_lines": [
+        "AssertionError: collective_rpc should not be called on follower node"
+      ],
+      "verdict": "launcher error on our side, not a checkpoint or engine limit. Fixed by passing --headless on node-rank 1."
+    },
+    {
+      "id": "A2",
+      "extra": "no speculative config; follower with --headless",
+      "reached": "weight load complete, then post-load stage (memory profiling / CUDA graph capture)",
+      "weight_load": "Model loading took 61.13 GiB memory and 407.051269 seconds (per node)",
+      "last_lines_before_silence": [
+        "Using FlashInfer for top-p & top-k sampling.",
+        "Setting attention block size to 1568 tokens to ensure that attention page size is >= mamba page size.",
+        "Padding mamba page size by 0.13% to ensure that mamba page size and attention page size are exactly equal.",
+        "Reducing Torch threads from 20 to 1 for serving."
+      ],
+      "outcome": "both nodes stopped answering SSH ~15 minutes after that last line; port 8890 refused connections; node 1 later stopped answering ICMP. No /v1/models, no KV pool figure, no serving.",
+      "verdict": "host memory exhaustion at the post-load stage. GB10's ~120 GiB is unified (host and device share one pool), so --gpu-memory-utilization 0.85 reserves against a budget the host runtime also draws on — which is not the case on the discrete B200/B300 NVIDIA tested. 0.70-0.75 is the first thing to change on the next attempt."
+    }
+  ],
+  "not_measured": [
+    "boot seconds to first /v1/models",
+    "KV pool size",
+    "resident memory after full init",
+    "prompt-length sweep (327 ... 131k)",
+    "concurrency 1/4/8 at 4k",
+    "quant-vs-quant teacher-forced agreement",
+    "GSM8K 50 / HumanEval 20"
+  ]
+}
