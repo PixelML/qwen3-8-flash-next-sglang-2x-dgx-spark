@@ -1,0 +1,52 @@
+{
+  "question": "Is there a prebuilt vLLM for GB10 / aarch64 that includes ModelOpt NVFP4 at or after the commit NVIDIA's model card requires?",
+  "required_commit": {
+    "sha": "d4d703caf908786416585ceb1f369e2e0363358b",
+    "subject": "[Bugfix][Model] Fix FP8 PLE loading in mixed ModelOpt checkpoints (#54882)",
+    "authored_utc": "2026-09-03T17:09:39Z",
+    "source": "nvidia/Qwen3.8-Flash-Next-NVFP4 model card"
+  },
+  "candidates": [
+    {
+      "image": "ghcr.io/anemll/dspark-vllm-gx10:0.1.1",
+      "already_on_nodes": true,
+      "vllm_version": "0.25.2.dev0+g752a3a504.d20260714",
+      "torch": "2.11.0+cu130",
+      "vs_required_commit": {"status": "diverged", "ahead": 19, "behind": 2343},
+      "satisfies": false
+    },
+    {
+      "image": "vllm/vllm-openai:nightly-65b7662d3fcb773afaf751ab29ac6960a0cf011d",
+      "already_on_nodes": true,
+      "vllm_version": "0.26.1rc1.dev602+g65b7662d3",
+      "torch": "2.13.0+cu130",
+      "vs_required_commit": {"status": "behind", "ahead": 0, "behind": 1024},
+      "satisfies": false
+    },
+    {
+      "image": "vllm/vllm-openai:nightly-e962733e08d10f7ca65dac4df99e116460b8b174",
+      "already_on_nodes": false,
+      "published_utc": "2026-09-05T06:16:31Z",
+      "arm64_digest": "sha256:df871f170ee7070fbdce162bde08fb616e311570c948a620be0d4b33fe02f87b",
+      "vllm_version_reported_at_boot": "0.28.1rc1.dev437+ge962733e0",
+      "vs_required_commit": {"status": "ahead", "ahead": 76, "behind": 0},
+      "cuda_line": "plain `nightly` tag is the CUDA 13 line (the `cu129-nightly` tag is not); GB10 needs CUDA 13",
+      "satisfies": true,
+      "selected": true
+    }
+  ],
+  "gb10_smoke_test_in_selected_image": {
+    "torch.cuda.get_device_capability": [12, 1],
+    "torch.cuda.get_device_name": "NVIDIA GB10",
+    "torch.cuda.get_arch_list": ["sm_80", "sm_90", "sm_100", "sm_110", "sm_120"],
+    "bf16_matmul_1024x1024": "ran, finite result",
+    "note": "sm_121 is absent from the compiled arch list, yet the device runs: CUDA family compatibility covers sm_121 from the sm_120 binaries. Arch list alone is not a go/no-go signal on GB10."
+  },
+  "multi_node_mechanism": {
+    "ray_installed_in_image": false,
+    "flags_present": ["--nnodes", "--node-rank", "--master-addr", "--master-port", "--headless", "--distributed-executor-backend {external_launcher,mp,ray,uni}"],
+    "chosen": "native multi-node mp via --nnodes/--node-rank/--master-addr/--master-port; no Ray needed",
+    "gotcha": "the follower node must be started with --headless, or its EngineCore aborts with `AssertionError: collective_rpc should not be called on follower node`"
+  },
+  "source_build": "not required, and not attempted (the Sparks were not to be used to build vLLM from source)"
+}
