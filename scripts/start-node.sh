@@ -33,6 +33,12 @@ mkdir -p \
   "${REPO_ROOT}/cache/torch" \
   "${REPO_ROOT}/cache/triton"
 
+# SGLang 0.0.0.dev1+gd91c3682b ships the idle strict memory check ON. Under
+# sustained mixed-length load the KV/mamba page accounting drifts by a few
+# thousand tokens out of ~570k and the checker turns that into a fatal
+# "pool memory leak detected", killing the engine roughly every 10-15 minutes.
+# Default stays 1 (published behaviour); set STRICT_MEM_CHECK_DURING_IDLE=0 to
+# demote it to a warning for long unattended runs.
 docker run --detach \
   --name "${CONTAINER_NAME}" \
   --restart unless-stopped \
@@ -46,6 +52,7 @@ docker run --detach \
   --log-opt max-size=100m \
   --log-opt max-file=5 \
   --env NODE_RANK="${NODE_RANK}" \
+  --env QUANTIZATION="${QUANTIZATION}" \
   --env DIST_INIT_ADDR="${RANK0_ADDR}:${DIST_PORT}" \
   --env API_PORT="${API_PORT}" \
   --env CONTEXT_LENGTH="${CONTEXT_LENGTH}" \
@@ -70,6 +77,7 @@ docker run --detach \
   --env TORCH_NCCL_DUMP_ON_TIMEOUT=1 \
   --env TORCH_NCCL_ENABLE_MONITORING=1 \
   --env TORCHINDUCTOR_CACHE_DIR=/cache/torch \
+  --env SGLANG_ENABLE_STRICT_MEM_CHECK_DURING_IDLE="${STRICT_MEM_CHECK_DURING_IDLE:-1}" \
   --env TRITON_CACHE_DIR=/cache/triton \
   --mount type=bind,src="${MODEL_DIR}",dst=/models/qwen38-flash-next,readonly \
   --mount type=bind,src="${SECRET_FILE}",dst=/run/secrets/sglang-api-key,readonly \
@@ -92,7 +100,7 @@ docker run --detach \
     --nnodes 2 \
     --node-rank "${NODE_RANK}" \
     --dist-init-addr "${DIST_INIT_ADDR}" \
-    --quantization modelopt_fp4 \
+    --quantization "${QUANTIZATION}" \
     --fp4-gemm-backend flashinfer_cutlass \
     --page-size 64 \
     --linear-attn-prefill-backend triton \

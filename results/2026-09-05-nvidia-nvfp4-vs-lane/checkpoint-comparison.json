@@ -1,0 +1,55 @@
+{
+  "generated_utc": "2026-09-05T10:35:00Z",
+  "question": "Is nvidia/Qwen3.8-Flash-Next-NVFP4 better than the lane's checkpoint on 2x DGX Spark?",
+  "checkpoints": {
+    "lane": {
+      "hub_repo": "PixelML/Qwen3.8-Flash-Next-NVFP4-Dual-DGX-Spark",
+      "hub_revision": "b80180e371f13348ec49641a6e66999e7854b179",
+      "upstream_repo": "RadixArk/Qwen3.8-Flash-Next-NVFP4",
+      "upstream_revision": "7b719225242aacd3dbd3f9407468c2ee9a9d2594",
+      "hub_size_gb": 135.3,
+      "hub_files": 419,
+      "on_disk_mib": 126586,
+      "quant_algo": "NVFP4",
+      "group_size": 16,
+      "kv_cache_quant_algo": null,
+      "exclude_modules_count": 13,
+      "exclude_modules_sample": ["model.embed_tokens", "mtp.*", "model.mtp.*", "*.self_attn.*", "*.linear_attn.*", "*.mlp.gate*"],
+      "quantized_layers_map": false,
+      "tensor_dtypes": {"F8_E4M3": 73856, "U8": 73728, "F32": 147456, "BF16": 1432, "I64": 3},
+      "gb_by_dtype": {"F8_E4M3": 58.7, "U8": 60.4, "BF16": 16.0},
+      "sglang_quantization_flag": "modelopt_fp4",
+      "license": "Qwen Community License 1.0",
+      "attribution": "NVFP4 conversion by RadixArk; PixelML repo is an exact community mirror"
+    },
+    "nvidia": {
+      "hub_repo": "nvidia/Qwen3.8-Flash-Next-NVFP4",
+      "hub_revision": "fab0aecb760cec45227f6656abcaafa11abca87a",
+      "hub_size_gb": 132.7,
+      "hub_files": 25,
+      "on_disk_mib": 126586,
+      "on_disk_bytes": 132734514674,
+      "quant_algo": "MIXED_PRECISION",
+      "group_size": 16,
+      "kv_cache_quant_algo": null,
+      "exclude_modules_count": 292,
+      "quantized_layers_map": true,
+      "quantized_layers_count": 50,
+      "config_groups_group_0_targets": "model.language_model.layers.*.mlp.experts only",
+      "tensor_dtypes": {"F8_E4M3": 75392, "U8": 73728, "F32": 147456, "BF16": 2966, "I64": 3},
+      "gb_by_dtype": {"F8_E4M3": 61.3, "U8": 60.4, "BF16": 11.0},
+      "sglang_quantization_flag": "modelopt_mixed",
+      "license": "NVIDIA Open Model License + Qwen Community License 1.0",
+      "card_release_date": "2026-08-31",
+      "card_supported_runtime": ["vLLM"],
+      "card_supported_hardware": ["NVIDIA Blackwell B200", "NVIDIA Blackwell B300"],
+      "attribution": "Quantized by NVIDIA with Model Optimizer v0.46.0"
+    }
+  },
+  "tokenizer_identical": {
+    "verified": true,
+    "md5_identical_files": ["tokenizer.json", "tokenizer_config.json", "vocab.json", "merges.txt", "generation_config.json"],
+    "why_it_matters": "Both arms would be scored at identical token positions with identical sampling defaults, so a teacher-forced comparison would have been valid."
+  },
+  "outcome": "nvidia checkpoint could not be served under the published recipe; see armB-load-failure.md"
+}
