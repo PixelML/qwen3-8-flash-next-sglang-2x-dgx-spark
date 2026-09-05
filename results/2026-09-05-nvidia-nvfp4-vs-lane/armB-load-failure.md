@@ -37,8 +37,8 @@ If exit code is -9 (SIGKILL), a common cause is the OS OOM killer.
 and rank 0 sees only the far side dropping:
 
 ```
-Error ignored in is_in_the_same_node: ... Connection closed by peer [10.100.120.1]
-RuntimeError: ... Connection closed by peer [10.100.120.1]:56223. This is
+Error ignored in is_in_the_same_node: ... Connection closed by peer [rank-1 node]
+RuntimeError: ... Connection closed by peer [rank-1 node]. This is
 typically caused by a remote worker crashing.
 ```
 
